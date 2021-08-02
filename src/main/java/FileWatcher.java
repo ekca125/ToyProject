@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 public class FileWatcher {
@@ -32,12 +33,10 @@ public class FileWatcher {
                     Path filePath = Paths.get(this.targetFolder.toString(),fileName.toString());
                     Path resultFilePath = Paths.get(this.resultFolder.toString(),fileName.toString());
 
-
-
-                    Files.move()
-
-                    System.out.println(fileName);
-                    System.out.println(filePath);
+                    BasicFileAttributes basicFileAttributes = Files.readAttributes(filePath,BasicFileAttributes.class);
+                    if((!fileName.toString().contains(".part"))&&(!basicFileAttributes.isDirectory())){
+                        Files.move(filePath,resultFilePath,copyOptions);
+                    }
                 }
                 changeKey.reset();
             }
