@@ -34,7 +34,9 @@ public class FileWatcher {
                     Path resultFilePath = Paths.get(this.resultFolder.toString(),fileName.toString());
 
                     BasicFileAttributes basicFileAttributes = Files.readAttributes(filePath,BasicFileAttributes.class);
-                    if((!fileName.toString().contains(".part"))&&(!basicFileAttributes.isDirectory())){
+                    if((!fileName.toString().contains(".part"))
+                            && (!fileName.toString().contains(".encrypted"))
+                            && (!basicFileAttributes.isDirectory())){
                         Files.move(filePath,resultFilePath,copyOptions);
                     }
                 }
