@@ -1,19 +1,33 @@
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.Executors;
 
-public class FileScheduleWatcher extends FileWatcher {
+public class FileScheduleWatcher extends FileWatcher implements Runnable{
     public FileScheduleWatcher(Path targetFolder, Path resultFolder) {
         super(targetFolder, resultFolder);
     }
 
-    public static void main(String[] args) {
-        //args 사용
+    @Override
+    public void startWatch() {
+        //executors
+    }
 
+    public static void main(String[] args) {
+        try{
+            Path targetFolder = Paths.get(args[0]);
+            Path resultFolder = Paths.get(args[1]);
+            FileWatcher fileWatcher = new FileScheduleWatcher(targetFolder,resultFolder);
+            //1시간마다 실행
+            Executors.newSingleThreadExecutor();
+            fileWatcher.run();
+        } catch (ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException) {
+            System.out.println("Not Enough Values");
+        }
     }
 
     @Override
-    public void startWatch() {
+    public void run() {
         try {
             Files.walkFileTree(targetFolder, new FileVisitor<Path>() {
                 @Override
