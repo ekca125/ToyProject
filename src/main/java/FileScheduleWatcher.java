@@ -33,7 +33,7 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable {
             throw new IllegalStateException();
         }
         running = true;
-        scheduledExecutorService.scheduleWithFixedDelay(this, 0, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this, 0, 1, TimeUnit.HOURS);
     }
 
     @Override
@@ -66,7 +66,6 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    BasicFileAttributes attributes = Files.readAttributes(dir, BasicFileAttributes.class);
                     if ((!Files.isSameFile(dir, targetFolder))) {
                         try {
                             Files.delete(dir);
