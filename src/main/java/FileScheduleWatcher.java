@@ -7,9 +7,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class FileScheduleWatcher extends FileWatcher implements Runnable {
-    ScheduledExecutorService scheduledExecutorService;
-    int delayHour;
-    boolean running;
+    private ScheduledExecutorService scheduledExecutorService;
+    private int delayHour;
+    private boolean running;
 
     public FileScheduleWatcher(Path targetFolder, Path resultFolder, List<String> ignoreExtList) {
         this(targetFolder, resultFolder, ignoreExtList, 1);
@@ -17,8 +17,8 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable {
 
     public FileScheduleWatcher(Path targetFolder, Path resultFolder, List<String> ignoreExtList, int delayHour) {
         super(targetFolder, resultFolder, ignoreExtList);
-        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         this.running = false;
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         this.delayHour = delayHour;
     }
 
@@ -33,7 +33,7 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable {
             throw new IllegalStateException();
         }
         running = true;
-        scheduledExecutorService.scheduleWithFixedDelay(this, 0, 1, TimeUnit.HOURS);
+        scheduledExecutorService.scheduleWithFixedDelay(this, 0, delayHour, TimeUnit.HOURS);
     }
 
     @Override
