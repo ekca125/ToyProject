@@ -1,29 +1,32 @@
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class FileScheduleWatcher extends FileWatcher implements Runnable{
+    ScheduledExecutorService scheduledExecutorService;
+    boolean running;
+
     public FileScheduleWatcher(Path targetFolder, Path resultFolder) {
         super(targetFolder, resultFolder);
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        this.running=false;
     }
 
     @Override
     public void startWatch() {
-        //executors
+        if(running){
+            throw new IllegalStateException();
+        }
+        running=true;
+        scheduledExecutorService.scheduleWithFixedDelay(this,0,1, TimeUnit.SECONDS);
     }
 
-    public static void main(String[] args) {
-        try{
-            Path targetFolder = Paths.get(args[0]);
-            Path resultFolder = Paths.get(args[1]);
-            FileWatcher fileWatcher = new FileScheduleWatcher(targetFolder,resultFolder);
-            //1시간마다 실행
-            Executors.newSingleThreadExecutor();
-            fileWatcher.run();
-        } catch (ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException) {
-            System.out.println("Not Enough Values");
-        }
+    private Path getResultPath(Path path){
+        return Paths.get(resultFolder.toString()+path.toString().replace(targetFolder.toString(),""));
     }
 
     @Override
@@ -32,7 +35,7 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
             Files.walkFileTree(targetFolder, new FileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    Path resultDir = Paths.get(resultFolder.toString() + dir.toString().replace(targetFolder.toString(), ""));
+                    Path resultDir = getResultPath(dir);
                     if (!Files.exists(resultDir)) {
                         Files.createDirectories(resultDir);
                     }
@@ -41,8 +44,8 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Path resultFile = getResultPath(file);
                     if ((!file.toString().contains(".part")) && (!file.toString().contains(".encrypted"))) {
-                        Path resultFile = Paths.get(resultFolder.toString() + file.toString().replace(targetFolder.toString(), ""));
                         Files.move(file, resultFile, copyOptions);
                     }
                     return FileVisitResult.CONTINUE;
@@ -55,6 +58,11 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    BasicFileAttributes attributes = Files.readAttributes(dir,BasicFileAttributes.class);
+                    if(attributes.size()==0
+                        &&(Files.isSameFile(dir,targetFolder))){
+                        Files.delete(dir);
+                    }
                     return FileVisitResult.CONTINUE;
                 }
             });
@@ -63,4 +71,14 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
         }
     }
 
+    public static void main(String[] args) {
+        try{
+            Path targetFolder = Paths.get(args[0]);
+            Path resultFolder = Paths.get(args[1]);
+            FileWatcher fileWatcher = new FileScheduleWatcher(targetFolder,resultFolder);
+            fileWatcher.startWatch();
+        } catch (ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException) {
+            System.out.println("Not Enough Values");
+        }
+    }
 }
