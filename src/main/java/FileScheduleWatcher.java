@@ -1,19 +1,26 @@
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 public class FileScheduleWatcher extends FileWatcher implements Runnable{
     ScheduledExecutorService scheduledExecutorService;
     boolean running;
 
-    public FileScheduleWatcher(Path targetFolder, Path resultFolder) {
-        super(targetFolder, resultFolder);
+    public FileScheduleWatcher(Path targetFolder, Path resultFolder, List<String> ignoreExtList) {
+        super(targetFolder, resultFolder, ignoreExtList);
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         this.running=false;
+    }
+
+
+    private Path getResultPath(Path path){
+        return Paths.get(resultFolder.toString()+path.toString().replace(targetFolder.toString(),""));
     }
 
     @Override
@@ -23,10 +30,6 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
         }
         running=true;
         scheduledExecutorService.scheduleWithFixedDelay(this,0,1, TimeUnit.SECONDS);
-    }
-
-    private Path getResultPath(Path path){
-        return Paths.get(resultFolder.toString()+path.toString().replace(targetFolder.toString(),""));
     }
 
     @Override
@@ -45,7 +48,8 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Path resultFile = getResultPath(file);
-                    if ((!file.toString().contains(".part")) && (!file.toString().contains(".encrypted"))) {
+                    if(ignoreExtList.stream().noneMatch(s -> file.toString().contains(s))){
+                        CopyOption[] copyOptions = new CopyOption[]{StandardCopyOption.REPLACE_EXISTING};
                         Files.move(file, resultFile, copyOptions);
                     }
                     return FileVisitResult.CONTINUE;
@@ -68,17 +72,6 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable{
             });
         } catch (IOException e) {
             System.out.println("폴더 순회중 오류가 발생했습니다.");
-        }
-    }
-
-    public static void main(String[] args) {
-        try{
-            Path targetFolder = Paths.get(args[0]);
-            Path resultFolder = Paths.get(args[1]);
-            FileWatcher fileWatcher = new FileScheduleWatcher(targetFolder,resultFolder);
-            fileWatcher.startWatch();
-        } catch (ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException) {
-            System.out.println("Not Enough Values");
         }
     }
 }

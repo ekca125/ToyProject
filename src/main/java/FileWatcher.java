@@ -2,14 +2,15 @@ import java.io.IOException;
 import java.nio.file.CopyOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 public abstract class FileWatcher {
     protected Path targetFolder;
     protected Path resultFolder;
-    protected CopyOption[] copyOptions;
+    protected final List<String> ignoreExtList;
 
-    public FileWatcher(Path targetFolder, Path resultFolder) {
-        copyOptions = new CopyOption[]{StandardCopyOption.REPLACE_EXISTING};
+    public FileWatcher(Path targetFolder, Path resultFolder, List<String> ignoreExtList) {
+        this.ignoreExtList = ignoreExtList;
         try {
             this.targetFolder = targetFolder.toRealPath();
             this.resultFolder = resultFolder.toRealPath();
@@ -18,6 +19,5 @@ public abstract class FileWatcher {
             this.resultFolder = null;
         }
     }
-
     abstract public void startWatch();
 }
