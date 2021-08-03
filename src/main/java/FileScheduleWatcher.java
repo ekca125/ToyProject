@@ -68,12 +68,18 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable {
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                     BasicFileAttributes attributes = Files.readAttributes(dir, BasicFileAttributes.class);
                     if ((!Files.isSameFile(dir, targetFolder))) {
-                        Files.delete(dir);
+                        try {
+                            Files.delete(dir);
+                        }
+                        catch (IOException ignored){
+                            //파일을 다운로드 하고 있어서 디렉토리가 비어있지 않은 경우
+                        }
                     }
                     return FileVisitResult.CONTINUE;
                 }
             });
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("폴더 순회중 오류가 발생했습니다.");
         }
     }

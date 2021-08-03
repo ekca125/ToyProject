@@ -11,7 +11,6 @@ public class JDownloaderScheduleMover extends FileScheduleWatcher {
         try {
             Path targetFolder = Paths.get(args[0]);
             Path resultFolder = Paths.get(args[1]);
-            //리스트 추가
             List<String> ignoreExtList = List.of(".part", ".encrypt");
 
             JDownloaderScheduleMover jDownloaderScheduleMover = new JDownloaderScheduleMover(targetFolder, resultFolder, ignoreExtList);
