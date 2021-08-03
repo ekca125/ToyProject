@@ -7,8 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class FileScheduleWatcher extends FileWatcher implements Runnable {
-    private ScheduledExecutorService scheduledExecutorService;
-    private int delayHour;
+    private final ScheduledExecutorService scheduledExecutorService;
+    private final int delayHour;
     private boolean running;
 
     public FileScheduleWatcher(Path targetFolder, Path resultFolder, List<String> ignoreExtList) {
@@ -69,8 +69,7 @@ public class FileScheduleWatcher extends FileWatcher implements Runnable {
                     if ((!Files.isSameFile(dir, targetFolder))) {
                         try {
                             Files.delete(dir);
-                        }
-                        catch (IOException ignored){
+                        } catch (IOException ignored) {
                             //파일을 다운로드 하고 있어서 디렉토리가 비어있지 않은 경우
                         }
                     }
