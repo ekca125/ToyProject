@@ -1,0 +1,19 @@
+
+1. Chrome을 디버그모드로 실행시킨다.
+2. 크롤러를 실행시킨다.
+
+원리
+chrome을 디버그 모드로 실행시킴으로써 제어를 가능하게 하며 이는 네이티브 환경에서 동작시키는 것과 동일하므로
+완전한 크롤링 탐지의 회피를 가능하게 한다.
+
+명령어
+
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+cd C:\Program Files\Google\Chrome\Application
+chrome.exe --remote-debugging-port=9222 --user-data-dir="C:/Chrome_debug_temp"
+
+google-chrome --remote-debugging-port=9222 --user-data-dir="/home/ubuntu/chrome"
+
